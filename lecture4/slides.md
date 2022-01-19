@@ -1,8 +1,13 @@
 ---
-title: "Machine Learning for Causal Inference from Observational Data"
-author: Damian Machlanski
-institute: CSEE and MiSoC, University of Essex
-date: July 29th 2021
+title: |
+    CE888: Data Science and Decision Making
+    \newline
+    Lecture 4: Causal Inference
+author: |
+    Damian Machlanski
+    \newline
+    d.machlanski@essex.ac.uk
+institute: University of Essex
 ---
 
 #
@@ -16,16 +21,18 @@ date: July 29th 2021
 
 # Introduction
 
-## Welcome!
-* Agenda
-  * Slides: Introduction to Causal Inference
-  * Tutorial: Guided Example with Code
-  * Exercise: Do It Yourself
+## The Plan for Week 4
+* Today
+  * Lecture
+* Labs
+  * Quiz (Moodle)
+  * Modelling (Colab)
 
-With some breaks in the middle as necessary.
+Do the quiz before starting the lab exercises.
 
 ## Resources
 * Textbooks
+  * Add The Book of Why
   * [J. Pearl, M. Glymour, and N. P. Jewell, Causal Inference in Statistics: A Primer. John Wiley & Sons, 2016.](http://bayes.cs.ucla.edu/PRIMER/)
   * [J. Peters, D. Janzing, and B. Scholkopf, Elements of Causal Inference: Foundations and Learning Algorithms. The MIT Press, 2017.](https://mitpress.mit.edu/books/elements-causal-inference)
 * Online
@@ -177,6 +184,16 @@ $$\epsilon_{PEHE} = \sqrt{\frac{1}{n}\sum \limits_{i=1}^{n}(\widehat{ITE}^{(i)} 
 $$\epsilon_{ATE} = \left| \widehat{ATE} - ATE \right|$$
 
 Where $PEHE$ stands for Precision in Estimation of Heterogeneous Effect, and which essentially is a Root Mean Squared Error (RMSE) between predicted and true ITEs.
+
+When do we have counterfactuals? Mostly data with simulated outcomes (it is not natural to observe alternative realities!).
+
+Note: These metrics assume access to **counterfactuals**!
+
+## Metrics - Predictions (2)
+
+What if we do not know counterfactuals? There are other merics to choose from.
+
+This often happens in real life applications (observational data or mixed with experimental ones).
 
 ## Benchmark Datasets
 Semi-simulated data or combinations of experimental and observaional datasets. We use metrics depending on what outcomes we have access to. Counterfactuals - ATE and PEHE. Otherwise ATT.
