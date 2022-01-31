@@ -9,7 +9,7 @@ def pehe(effect_true, effect_pred):
 
     :return: PEHE
     """
-    return np.sqrt(np.mean((effect_true - effect_pred)**2))
+    # This function should be completed as part of Unit 4.
 
 def abs_ate(effect_true, effect_pred):
     """
@@ -20,7 +20,7 @@ def abs_ate(effect_true, effect_pred):
 
     :return: absolute error on ATE
     """
-    return np.abs(np.mean(effect_pred) - np.mean(effect_true))
+    # This function should be completed as part of Unit 4.
 
 def abs_att(effect_pred, yf, t, e):
     """
