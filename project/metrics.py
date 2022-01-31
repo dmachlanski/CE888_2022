@@ -1,11 +1,5 @@
 import numpy as np
 
-def rmse(a, b):
-    """"
-    Root mean squared error between two arrays
-    """
-    return np.sqrt(np.mean((a - b)**2))
-
 def pehe(effect_true, effect_pred):
     """
     Precision in Estimating the Heterogeneous Treatment Effect (PEHE)
@@ -15,7 +9,7 @@ def pehe(effect_true, effect_pred):
 
     :return: PEHE
     """
-    return rmse(effect_true, effect_pred)
+    return np.sqrt(np.mean((effect_true - effect_pred)**2))
 
 def abs_ate(effect_true, effect_pred):
     """
