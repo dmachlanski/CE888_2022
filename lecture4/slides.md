@@ -32,24 +32,24 @@ Do the quiz before starting the lab exercises.
 
 ## Resources
 * Textbooks
-  * Add The Book of Why
+  * [J. Pearl and D. Mackenzie, The Book of Why: The New Science of Cause and Effect, 1st ed. USA: Basic Books, Inc., 2018.](http://bayes.cs.ucla.edu/WHY/)
   * [J. Pearl, M. Glymour, and N. P. Jewell, Causal Inference in Statistics: A Primer. John Wiley & Sons, 2016.](http://bayes.cs.ucla.edu/PRIMER/)
   * [J. Peters, D. Janzing, and B. Scholkopf, Elements of Causal Inference: Foundations and Learning Algorithms. The MIT Press, 2017.](https://mitpress.mit.edu/books/elements-causal-inference)
 * Online
   * [Introduction to Causal Inference](https://www.bradyneal.com/causal-inference-course)
 
+See Moodle page for a more extensive list of additional resources.
+
 ## Tools
 We are going to use the following:
 
 * Python 3
-* numpy
-* pandas
-* matplotlib
-* scikit-learn
-* [EconML](https://github.com/microsoft/EconML)
+* scikit-learn (ML methods)
+* [EconML](https://github.com/microsoft/EconML) (CI estimators)
+* the usual stack (numpy, pandas, matplotlib)
 * Google Colab
 
-## Machine Learning
+## A Machine Learning Perspective
 We will need the following:
 
 * Supervised learning - predict $y$ given $(X, y)$ samples
@@ -57,23 +57,103 @@ We will need the following:
   * Classification (binary outcome)
 * Basic data exploration
 * Data pre-processing
-* Cross-validation
-* Model selection
+* Training and testing
+* Using metrics
+
+We know all this by now -> we can do causal inference!
+
+## Why Do I Need This?
+
+* Data science is more than just ML
+* It's about **decision making**
+* Associations vs. causal relations
+* *Correlation does not imply causation*
+* Also: biases and shifts within the data that skew the results
+* Wrong conclusions -> bad decisions
 
 # Motivation
 
-## Problem Setting
-* We want to estimate the *causal effect* of treatment $T$ on outcome $Y$
-  * What benefits accrue if we intervene to change $T$?
-  * Treatment must be modifiable
-  * We observe only one outcome per each individual
+## Spurious Correlations
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/corrs1.png}
+\end{figure}
 
-* Example:
-  * My headache went away after I had taken the aspirin
-  * Would the headache have gone away without taking the aspirin?
-  * We cannot go back in time and test the alternative!
-  * Treatment effect
-  * Test more people and measure the average outcome?
+Credit: https://www.tylervigen.com/spurious-correlations
+
+## Spurious Correlations (2)
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/corrs2.png}
+\end{figure}
+
+Credit: https://www.tylervigen.com/spurious-correlations
+
+## Simpson's Paradox
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 50px},clip,width = 0.8\textwidth]{./graphics/paradox_all.png}
+\end{figure}
+
+## Simpson's Paradox
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 50px},clip,width = 0.8\textwidth]{./graphics/paradox_groups.png}
+\end{figure}
+
+## Takeaway
+::: columns
+
+:::: column
+* We need to think about the causal links within the data (causal graphs).
+* Cause and effect
+* Question: As we *change* the cause, how does the effect *change*?
+::::
+
+:::: column
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.6\textwidth]{./graphics/confounder.png}
+\end{figure}
+::::
+
+:::
+
+## Problem Setting
+We want to estimate the *causal effect* of treatment $T$ on outcome $Y$
+
+* What benefits accrue if we intervene to change $T$?
+* Treatment must be modifiable
+* We observe only one outcome per each individual
+
+Ideal scenario:
+
+1. Assume state $S_0$
+2. Apply the treatment ($t=1$)
+3. Observe the outcome ($Y_1$)
+4. Reset the state to $S_0$
+5. Do not apply the treatment ($t=0$)
+6. Observe the outcome ($Y_0$)
+7. Compare the outcomes $Y_1$ and $Y_0$ to get the causal effect
+
+## Real-life Example
+* My headache went away after I had taken the aspirin ($Y_1$)
+* Would the headache have gone away without taking the aspirin? ($Y_0 = ?$)
+* We cannot go back in time and test the alternative!
+* Cannot reset the state -> cannot compare the outcomes -> no effect
+* Test more people and measure the average outcome?
+
+## More Examples
+* Developing a new vaccine
+* Government policy
+* Recommending the best treatment for a specific patient
+
+It's about finding out how a specific action affects a system of interest.
+
+* Action == intervention (something we change)
+* System == the very thing we study (group of people, physical objects, etc.)
+* Outcome == system's characteristic of interest (response)
+* Effect == difference between outcomes
 
 ## Randomised Controlled Trials
 * Data from controlled experiments
@@ -92,6 +172,7 @@ We will need the following:
 * Abundant nowadays
 * Quasi-experimental study
 * Keep only $X$ recorded before $Y$ (discard other)
+* Lack of randomisation and control (imbalances)
 
 \begin{figure}
   \centering
@@ -99,28 +180,34 @@ We will need the following:
 \end{figure}
 
 ## ML Perspective
+* Correlation vs. causation
+* Outliers - different meaning
+* Imbalanced data (not just Y)
+* Out-of-distribution (OOD) generalisation
+* ML vs. CI:
+  * ML: predict Y given (X, Y) samples
+  * CI: predict **effects** given (X, Y) samples
+
+## More on ML vs. CI
 ::: columns
 
 :::: column
-* Correlation (association) vs causation
-* The role of confounders
-* Domain shift/adaptation perspective
-* Out-of-distribution (OOD) generalisation
-* Learn from given individuals, but predict unseen examples
-* Cannot learn from counterfactuals
-* On the surface it looks the same as supervised ML
-  * ML: predict Y given (X, Y) samples
-  * CI: predict **effects** given (X, Y) samples
+ML
+
+* Train on (X, Y) samples
+* Predict Y given X test samples
+* Assumes the same distribution of training and testing samples
 ::::
 
 :::: column
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.5\textwidth]{./graphics/confounder.png}
-\end{figure}
+CI
 
-* Learn: $[x_i, t_i, y_i]$
-* Predict: $[x_i, 1 - t_i]$ -> ?
+* Train on (X, T, Y) samples
+* Predict Y for (X, T) and **(X, 1-T)**
+* (X, 1-T): predict the outcomes we haven't observed
+* Treated ($t=1$) and control ($t=0$) groups often have different distributions
+* We learn from one distribution, but make predictions for a different one!
+* The usual IID assumption no longer applies here
 ::::
 
 :::
@@ -143,12 +230,11 @@ $$Effect = Y_1 - Y_0$$
 \end{tabular}
 \end{table}
 
-But we observe only one outcome!
+Observed and unobserved outcomes are **factuals** and **counterfactuals** respectively.
 
-This is known as the fundamental problem of causal inference. We cannot *know* the difference. But we can **approximate** it.
+Missing counterfactuals: This is known as the fundamental problem of causal inference. We cannot *observe* the difference, but we can **approximate** it.
 
 ## Treatment Effect
-
 Let us define the **true** outcome $\mathcal{Y}_t^{(i)}$ of individual $(i)$ that received treatment $t \in \{0, 1\}$. The Individual Treatment Effect (ITE) is then defined as follows:
 
 $$ITE^{(i)} = \mathcal{Y}_1^{(i)} - \mathcal{Y}_0^{(i)}$$
@@ -157,17 +243,67 @@ The Average Treatment Effect (ATE) builds on ITE:
 
 $$ATE = \mathbb{E}[ITE]$$
 
+Note: empirical (sample) ATE is the mean of ITEs.
+
+## Treatment Effect - ITE Example
+We are given the outcomes Y for both the treated ($t=1$) and control ($t=0$) case, where $Y_1=3$ and $Y_0=2$.
+
+What is the value of ITE?
+
+## Treatment Effect - ITE Example (2)
+We are given the outcomes Y for both the treated ($t=1$) and control ($t=0$) case, where $Y_1=3$ and $Y_0=2$.
+
+What is the value of ITE?
+
+$$ITE^{(i)} = \mathcal{Y}_1^{(i)} - \mathcal{Y}_0^{(i)}$$
+
+$$ITE = 3 - 2 = 1$$
+
+## Treatment Effect - ATE Example
+We are given the following data:
+
+* $Y_0 \in \{2, 3, 1\}$
+* $Y_1 \in \{3, 4, 2\}$
+
+What is the value of ATE?
+
+## Treatment Effect - ATE Example (2)
+We are given the following data:
+
+* $Y_0 \in \{2, 3, 1\}$
+* $Y_1 \in \{3, 4, 2\}$
+
+What is the value of ATE?
+
+$$ATE = \mathbb{E}[ITE]$$
+$$ITE^{(0)} = 3 - 2 = 1$$
+$$ITE^{(1)} = 4 - 3 = 1$$
+$$ITE^{(2)} = 2 - 1 = 1$$
+
+$$ATE = \frac{ITE^{(0)} + ITE^{(1)} + ITE^{(2)}}{3} = \frac{1 + 1 + 1}{3} = \frac{3}{3} = 1$$
+
 ## Metrics
 * In practice, we want to measure how accurate our inference model is
 * This is often done by measuring the amount of error ($\epsilon$) or risk ($\mathcal{R}$) introduced by a model
-* Examples:
-  * $\epsilon_{ITE}$
-  * $\epsilon_{ATE}$
-  * $\epsilon_{PEHE}$
-  * $\epsilon_{ATT}$
-  * $\mathcal{R}_{pol}$
 
-$\epsilon_{ATE}$ and $\epsilon_{PEHE}$ are the most common ones and we will focus on them.
+Examples:
+
+* $\epsilon_{ATE}$
+* $\epsilon_{PEHE}$
+* $\epsilon_{ATT}$
+* $\mathcal{R}_{pol}$
+
+## Metrics - Motivation
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/mse_example.pdf}
+\end{figure}
+
+## Metrics - Motivation (2)
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/policy_example.pdf}
+\end{figure}
 
 ## Metrics - Predictions
 Let us denote $\hat{y}_t^{(i)}$ as **predicted** outcome for individual $(i)$ that received treatment $t$. Then, our predicted ITE and ATE can be written as:
@@ -185,26 +321,40 @@ $$\epsilon_{ATE} = \left| \widehat{ATE} - ATE \right|$$
 
 Where $PEHE$ stands for Precision in Estimation of Heterogeneous Effect, and which essentially is a Root Mean Squared Error (RMSE) between predicted and true ITEs.
 
-When do we have counterfactuals? Mostly data with simulated outcomes (it is not natural to observe alternative realities!).
-
-Note: These metrics assume access to **counterfactuals**!
-
-## Metrics - Predictions (2)
-
-What if we do not know counterfactuals? There are other merics to choose from.
-
-This often happens in real life applications (observational data or mixed with experimental ones).
-
 ## Benchmark Datasets
-Semi-simulated data or combinations of experimental and observaional datasets. We use metrics depending on what outcomes we have access to. Counterfactuals - ATE and PEHE. Otherwise ATT.
+Semi-simulated data or combinations of experimental and observaional datasets. We use metrics depending on what kind of information we have access to (true effects/counterfactuals).
 
-Well-established causal inference datasets:
+Some well-established causal inference datasets:
 
 * IHDP
 * Jobs
 * News
 * Twins
 * ACIC challenges
+
+## Metrics - Types
+
+::: columns
+
+:::: column
+**With** effect/counterfactuals
+
+* $\epsilon_{ATE}$
+* $\epsilon_{PEHE}$
+* Datasets with simulated outcomes
+* (it's unnatural to observe both outcomes!)
+::::
+
+:::: column
+**Without** effect/counterfactuals
+
+* $\epsilon_{ATT}$ (ATE on the Treated)
+* $\mathcal{R}_{pol}$ (Policy Risk)
+* Datasets closer to reality
+* Either purely observational or mixed with RCTs
+::::
+
+:::
 
 ## Assumptions
 * Ignorability:
@@ -273,6 +423,19 @@ $$\widehat{ITE}(x) = \hat{\mu}(1, x) - \hat{\mu}(0, x)$$
 * Allows heterogenous treatment effects
 * Can be biased (next slide)
 
+## S-Learner - Code
+
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.9\textwidth]{./graphics/slearn_code.png}
+\end{figure}
+
+## When It Works
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.7\textwidth]{./graphics/ate_example.png}
+\end{figure}
+
 ## Biased Estimators
 \begin{figure}
   \centering
@@ -300,6 +463,13 @@ $$w_i = \frac{t_i}{\hat{e}(x_i)} + \frac{1-t_i}{1-\hat{e}(x_i)}$$
 * Either $\hat{e}(x)$ or $\hat{\mu}(x)$ can still have bias (misspecification)
 * Doubly-Robust method attempts to address that
 
+## IPW Estimator - Code
+
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.9\textwidth]{./graphics/ipw_code.png}
+\end{figure}
+
 ## T-Learner
 * Treated and control distributions are often different
 * Solution: fit *two* separate regressors
@@ -313,41 +483,37 @@ $$\mu_0(x) = \mathbb{E}[\mathcal{Y}|X=x, T=0]$$
 
 $$\widehat{ITE}(x) = \hat{\mu}_1(x) - \hat{\mu}_0(x)$$
 
+## T-Learner - Code
+
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.6\textwidth]{./graphics/tlearn_manual.png}
+\end{figure}
+
+## T-Learner - Code (2)
+
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.6\textwidth]{./graphics/tlearn_econml.png}
+\end{figure}
+
 ## X-Learner
-A hybrid of the previous approaches. There are three main stages.
+A hybrid of the previous approaches (details [here](http://arxiv.org/abs/1706.03461)). There are three main stages.
 
-**Stage 1** (same as T-Learner)
-
-1. Learn $\mu_1(x)$ from treated units, obtain $\hat{\mu}_1(x)$.
-2. Learn $\mu_0(x)$ from control units, obtain $\hat{\mu}_0(x)$.
-
-## X-Learner (2)
-**Stage 2**
-
-Define *imputed* treatment effects as:
-
-$$\mathcal{D}_0^{(i)} = \hat{\mu}_1(X_0^{(i)}) - \mathcal{Y}_0^{(i)}$$
-$$\mathcal{D}_1^{(i)} = \mathcal{Y}_1^{(i)} - \hat{\mu}_0(X_1^{(i)})$$
-
-Use provided regressors to model $\mathcal{D}_0$ and $\mathcal{D}_1$ separately. The response functions are formally defined as:
-
-$$\tau_0(x) = \mathbb{E}[\mathcal{D}_0|X=x]$$
-$$\tau_1(x) = \mathbb{E}[\mathcal{D}_1|X=x]$$
-
-We denote estimated functions as $\hat{\tau}_0$ and $\hat{\tau}_1$.
-
-## X-Learner (3)
-**Stage 3**
+1. Learn treated and control separately (same as T-Learner).
+2. Predict and learn *imputed* effects (mix of $Y_f$ and $Y_{cf}$).
+3. Learn a propensity score function.
 
 The final treatment effect estimate is a weighted average of the two estimates from Stage 2:
 
-$$\hat{\tau}(x) = g(x)\hat{\tau}_0(x) + (1 - g(x))\hat{\tau}_1(x)$$
-
-Where $g \in [0, 1]$ is a weight function. In practice, $g$ can be modelled as a propensity score function $e(x)$.
-
-Using a provided classifier, we can obtain an estimate $\hat{e}$ that can be used in place of $g$. That is:
-
 $$\hat{\tau}(x) = \hat{e}(x)\hat{\tau}_0(x) + (1 - \hat{e}(x))\hat{\tau}_1(x)$$
+
+## X-Learner - Code
+
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = 0.8\textwidth]{./graphics/xlearn_code.png}
+\end{figure}
 
 ## X-Learner - Intuition
 \begin{figure}
@@ -358,19 +524,28 @@ $$\hat{\tau}(x) = \hat{e}(x)\hat{\tau}_0(x) + (1 - \hat{e}(x))\hat{\tau}_1(x)$$
 # Conclusion
 
 ## Summary
-* Causal inference is about measuring causal effects
-  * Cannot calculate them exactly due to missing counterfactuals
-  * But we can approximate them through data
-* RCTs are the most reliable source of data, but can be unfeasible to get
+* We just scratched the surface here
+* Causal discovery (inferring graphs from data) - big topic on its own
+* Estimating causal effects vs. recommending treatments[](http://arxiv.org/abs/2104.04103)
+* Other methods
+  * Instrumental variables
+  * Relaxing the common assuptions
+  * Trees, neural networks, policy learners
+* ...
+
+## Main Takeaways
+* Causal inference is about estimating causal effects
+  * For instance, measure the effectiveness of a treatment
+* RCTs are the most reliable source of data, but can be unfeasible to obtain
 * Non-experimental data are a great alternative, but can be *biased*
 * Most methods are about finding *unbiased* estimators
 * Machine Learning and Causal Inference can be both mutually beneficial
   * ML delivers better CI estimators
-  * CI helps ML with OOD generalisation (domain adaptation)
-* Assumptions are important and must be considered in applications
+  * CI helps ML with OOD generalisation
+* Assumptions and graphs are important and must be considered in applications
 
 ## Acknowledgements
-This course builds heavily on the materials from *Introduction to Machine Learning for Causal Analysis Using Observational Data* online course, delivered on June 22-23 2021 by Damian Machlanski, Dr Spyros Samothrakis and Professor Paul Clarke.
+This lecture builds heavily on the materials from *Introduction to Machine Learning for Causal Analysis Using Observational Data* online course, delivered on June 22-23 2021 by Damian Machlanski, Dr Spyros Samothrakis and Professor Paul Clarke.
 
 ## References
 
@@ -385,15 +560,12 @@ This course builds heavily on the materials from *Introduction to Machine Learni
 * L. Yao, Z. Chu, S. Li, Y. Li, J. Gao, and A. Zhang, ‘A Survey on Causal Inference’, arXiv:2002.02770 [cs, stat], Feb. 2020.
 
 ## What's next?
-* Onto the practical parts
-  * Tutorial
-    * Predict ATE and measure $\epsilon_{ATE}$
-    * S-Learner, IPW and X-Learner
-    * Random Forest as base regressors and classifiers
-  * Exercise - IHDP
-    * Predict ITE and ATE
-    * Measure $\epsilon_{PEHE}$ and $\epsilon_{ATE}$
-  * Exercise - JOBS (optional)
-    * Predict ATT and Policy
-    * Measure $\epsilon_{ATT}$ and $\mathcal{R}_{pol}$
-* Short break?
+* Moodle quiz
+  * A few theoretical Qs
+  * Calculating effects and some metrics
+* Modelling
+  * Two datasets
+  * S-Learner, IPW, X-Learner
+  * Follow the instructions within the notebook
+
+Important: Do the quiz **first** before moving to the modelling part (you will need to know how to calulate effects and metrics).
