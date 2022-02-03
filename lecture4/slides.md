@@ -46,7 +46,7 @@ We are going to use the following:
 * Python 3
 * scikit-learn (ML methods)
 * [EconML](https://github.com/microsoft/EconML) (CI estimators)
-* the usual stack (numpy, pandas, matplotlib)
+* The usual stack (numpy, pandas, matplotlib)
 * Google Colab
 
 ## A Machine Learning Perspective
@@ -407,7 +407,9 @@ Mosty regression and classification (classic ML), but combined in a smart way.
   * Meta-Learners
   * Multiple based on neural networks (very advanced)
 
-We will start with a simple regression, enhance it with IPW, and conclude with Meta-Learners.
+Too many to discuss here, but we will learn some common principles.
+
+We will start with a simple regression, add IPW, and conclude with Meta-Learners.
 
 ## S-Learner
 We want to estimate
@@ -424,11 +426,22 @@ $$\widehat{ITE}(x) = \hat{\mu}(1, x) - \hat{\mu}(0, x)$$
 * Can be biased (next slide)
 
 ## S-Learner - Code
+\small
+```python
+lr = LinearRegression()
 
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.9\textwidth]{./graphics/slearn_code.png}
-\end{figure}
+# input: [X, T], target: Y
+lr.fit(np.concatenate([x_train, t_train], axis=1), y_train)
+
+# predict Y0 given [X, 0] - set T=0
+y0_pred = lr.predict(np.concatenate([x_test, np.zeros_like(t_test)], axis=1))
+# predict Y1 given [X, 1] - set T=1
+y1_pred = lr.predict(np.concatenate([x_test, np.ones_like(t_test)], axis=1))
+
+# effect = y1 - y0
+effect_pred = y1_pred - y0_pred
+```
+\normalsize
 
 ## When It Works
 \begin{figure}
@@ -464,11 +477,19 @@ $$w_i = \frac{t_i}{\hat{e}(x_i)} + \frac{1-t_i}{1-\hat{e}(x_i)}$$
 * Doubly-Robust method attempts to address that
 
 ## IPW Estimator - Code
+\small
+```python
+clf = LogisticRegression()
+weights = get_ps_weights(clf, x_train, t_train)
 
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.9\textwidth]{./graphics/ipw_code.png}
-\end{figure}
+lr = LinearRegression()
+
+# input: [X, T], target: Y
+lr.fit(np.concatenate([x_train, t_train], axis=1), y_train, sample_weight=weights)
+
+# ...
+```
+\normalsize
 
 ## T-Learner
 * Treated and control distributions are often different
@@ -484,18 +505,36 @@ $$\mu_0(x) = \mathbb{E}[\mathcal{Y}|X=x, T=0]$$
 $$\widehat{ITE}(x) = \hat{\mu}_1(x) - \hat{\mu}_0(x)$$
 
 ## T-Learner - Code
+\small
+```python
+m0 = LinearRegression()
+m1 = LinearRegression()
 
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.6\textwidth]{./graphics/tlearn_manual.png}
-\end{figure}
+t0_idx = (t_train == 0).flatten()
+t1_idx = (t_train == 1).flatten()
+
+# train on control units
+m0.fit(x_train[t0_idx], y_train[t0_idx])
+# train on treated units
+m1.fit(x_train[t1_idx], y_train[t1_idx])
+
+y0_pred = m0.predict(x_test)
+y1_pred = m1.predict(x_test)
+
+effect_pred = y1_pred - y0_pred
+```
+\normalsize
 
 ## T-Learner - Code (2)
+\small
+```python
+tl = TLearner(models=LinearRegression())
 
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.6\textwidth]{./graphics/tlearn_econml.png}
-\end{figure}
+tl.fit(y_train, t_train, X=x_train)
+
+effect_pred = tl.effect(x_test)
+```
+\normalsize
 
 ## X-Learner
 A hybrid of the previous approaches (details [here](http://arxiv.org/abs/1706.03461)). There are three main stages.
@@ -509,11 +548,15 @@ The final treatment effect estimate is a weighted average of the two estimates f
 $$\hat{\tau}(x) = \hat{e}(x)\hat{\tau}_0(x) + (1 - \hat{e}(x))\hat{\tau}_1(x)$$
 
 ## X-Learner - Code
+\small
+```python
+xl = XLearner(models=LinearRegression(), propensity_model=LogisticRegression())
 
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = 0.8\textwidth]{./graphics/xlearn_code.png}
-\end{figure}
+xl.fit(y_train, t_train, X=x_train)
+
+effect_pred = xl.effect(x_test)
+```
+\normalsize
 
 ## X-Learner - Intuition
 \begin{figure}
