@@ -283,6 +283,18 @@ $$ITE^{(2)} = 2 - 1 = 1$$
 
 $$ATE = \frac{ITE^{(0)} + ITE^{(1)} + ITE^{(2)}}{3} = \frac{1 + 1 + 1}{3} = \frac{3}{3} = 1$$
 
+## Treatment Effect - CATE
+
+A more general way of defining effects is through conditioning:
+
+$$CATE = \mathbb{E}\left [ \mathcal{Y}_1|X=x \right ] - \mathbb{E}\left [ \mathcal{Y}_0|X=x \right ]$$
+
+Which stands for Conditional Average Treatment Effect.
+
+Note the two previous effects are special cases of CATE (ATE: $x=\emptyset$, ITE: unique $x$).
+
+You will likely see CATE estimators in the literature and CI packages.
+
 ## Assumptions
 * Ignorability:
   * No hidden confounders (we observe everything)
