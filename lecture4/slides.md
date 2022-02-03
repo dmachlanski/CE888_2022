@@ -15,6 +15,7 @@ institute: University of Essex
 * Motivation
 * Causality
 * Methods
+* Metrics
 * Conclusion
 
 \usebackgroundtemplate{}
@@ -282,80 +283,6 @@ $$ITE^{(2)} = 2 - 1 = 1$$
 
 $$ATE = \frac{ITE^{(0)} + ITE^{(1)} + ITE^{(2)}}{3} = \frac{1 + 1 + 1}{3} = \frac{3}{3} = 1$$
 
-## Metrics
-* In practice, we want to measure how accurate our inference model is
-* This is often done by measuring the amount of error ($\epsilon$) or risk ($\mathcal{R}$) introduced by a model
-
-Examples:
-
-* $\epsilon_{ATE}$
-* $\epsilon_{PEHE}$
-* $\epsilon_{ATT}$
-* $\mathcal{R}_{pol}$
-
-## Metrics - Motivation
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/mse_example.pdf}
-\end{figure}
-
-## Metrics - Motivation (2)
-\begin{figure}
-  \centering
-  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/policy_example.pdf}
-\end{figure}
-
-## Metrics - Predictions
-Let us denote $\hat{y}_t^{(i)}$ as **predicted** outcome for individual $(i)$ that received treatment $t$. Then, our predicted ITE and ATE can be written as:
-
-$$\widehat{ITE}^{(i)} = \hat{y}_1^{(i)} - \hat{y}_0^{(i)}$$
-
-$$\widehat{ATE} = \frac{1}{n}\sum \limits_{i=1}^{n}\widehat{ITE}^{(i)}$$
-
-## Metrics - Measuring Errors
-This allows us to define the following measurement errors:
-
-$$\epsilon_{PEHE} = \sqrt{\frac{1}{n}\sum \limits_{i=1}^{n}(\widehat{ITE}^{(i)} - ITE^{(i)})^2}$$
-
-$$\epsilon_{ATE} = \left| \widehat{ATE} - ATE \right|$$
-
-Where $PEHE$ stands for Precision in Estimation of Heterogeneous Effect, and which essentially is a Root Mean Squared Error (RMSE) between predicted and true ITEs.
-
-## Benchmark Datasets
-Semi-simulated data or combinations of experimental and observaional datasets. We use metrics depending on what kind of information we have access to (true effects/counterfactuals).
-
-Some well-established causal inference datasets:
-
-* IHDP
-* Jobs
-* News
-* Twins
-* ACIC challenges
-
-## Metrics - Types
-
-::: columns
-
-:::: column
-**With** effect/counterfactuals
-
-* $\epsilon_{ATE}$
-* $\epsilon_{PEHE}$
-* Datasets with simulated outcomes
-* (it's unnatural to observe both outcomes!)
-::::
-
-:::: column
-**Without** effect/counterfactuals
-
-* $\epsilon_{ATT}$ (ATE on the Treated)
-* $\mathcal{R}_{pol}$ (Policy Risk)
-* Datasets closer to reality
-* Either purely observational or mixed with RCTs
-::::
-
-:::
-
 ## Assumptions
 * Ignorability:
   * No hidden confounders (we observe everything)
@@ -392,6 +319,10 @@ Some well-established causal inference datasets:
 ::::
 
 :::
+
+## Onto The Methods
+
+We know the theory. Now, let's do some modelling!
 
 # Methods
 
@@ -564,19 +495,102 @@ effect_pred = xl.effect(x_test)
   \includegraphics[trim={0 0 0 0},clip,width = 0.45\textwidth]{./graphics/xlearner.png}
 \end{figure}
 
+# Metrics
+
+## Evaluation
+- We have predicted some effects.
+- But are they accurate?
+- How good our model is at predicting effects?
+- Can we use the usual metrics like MSE?
+
+## MSE
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/mse_example.pdf}
+\end{figure}
+
+## Policy Risk
+\begin{figure}
+  \centering
+  \includegraphics[trim={0 0 0 0},clip,width = \textwidth]{./graphics/policy_example.pdf}
+\end{figure}
+
+## Error On Outcomes vs. Effects
+* Predicting accurate *outcomes* Y (MSE) is only half of the problem
+* However, the priority is to predict accurate **effects**
+* Thus, we need to measure the amount of error ($\epsilon$) or risk ($\mathcal{R}$) introduced by a model with respect to predicted effects
+
+Examples:
+
+* $\epsilon_{ATE}$
+* $\epsilon_{PEHE}$
+* $\epsilon_{ATT}$
+* $\mathcal{R}_{pol}$
+
+## Predictions
+Let us denote $\hat{y}_t^{(i)}$ as **predicted** outcome for individual $(i)$ that received treatment $t$. Then, our predicted ITE and ATE can be written as:
+
+$$\widehat{ITE}^{(i)} = \hat{y}_1^{(i)} - \hat{y}_0^{(i)}$$
+
+$$\widehat{ATE} = \frac{1}{n}\sum \limits_{i=1}^{n}\widehat{ITE}^{(i)}$$
+
+## Measuring Errors
+This allows us to define the following measurement errors:
+
+$$\epsilon_{PEHE} = \sqrt{\frac{1}{n}\sum \limits_{i=1}^{n}(\widehat{ITE}^{(i)} - ITE^{(i)})^2}$$
+
+$$\epsilon_{ATE} = \left| \widehat{ATE} - ATE \right|$$
+
+Where $PEHE$ stands for Precision in Estimation of Heterogeneous Effect, and which essentially is a Root Mean Squared Error (RMSE) between predicted and true ITEs.
+
+## Benchmark Datasets
+Semi-simulated data or combinations of experimental and observaional datasets. We use metrics depending on what kind of information we have access to (true effects/counterfactuals).
+
+Some well-established causal inference datasets:
+
+* IHDP
+* Jobs
+* News
+* Twins
+* ACIC challenges
+
+## Types Of Metrics
+
+::: columns
+
+:::: column
+**With** effect/counterfactuals
+
+* $\epsilon_{ATE}$
+* $\epsilon_{PEHE}$
+* Datasets with simulated outcomes
+* (it's unnatural to observe both outcomes!)
+::::
+
+:::: column
+**Without** effect/counterfactuals
+
+* $\epsilon_{ATT}$ (ATE on the Treated)
+* $\mathcal{R}_{pol}$ (Policy Risk)
+* Datasets closer to reality
+* Either purely observational or mixed with RCTs
+::::
+
+:::
+
 # Conclusion
 
-## Summary
+## There Is More
 * We just scratched the surface here
 * Causal discovery (inferring graphs from data) - big topic on its own
 * Estimating causal effects vs. recommending treatments[](http://arxiv.org/abs/2104.04103)
 * Other methods
   * Instrumental variables
-  * Relaxing the common assuptions
+  * Relaxing the common assumptions
   * Trees, neural networks, policy learners
 * ...
 
-## Main Takeaways
+## Summary
 * Causal inference is about estimating causal effects
   * For instance, measure the effectiveness of a treatment
 * RCTs are the most reliable source of data, but can be unfeasible to obtain
