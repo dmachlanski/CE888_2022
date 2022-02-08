@@ -71,6 +71,9 @@ We know all this by now -> we can do causal inference!
 * *Correlation does not imply causation*
 * Also: biases and shifts within the data that skew the results
 * Wrong conclusions -> bad decisions
+* Complimentary to permutation tests:
+  * PT: Is the effect statistically significant? (yes/no)
+  * CI: How big the effect is? (number)
 
 # Motivation
 
@@ -132,7 +135,7 @@ Ideal scenario:
 1. Assume state $S_0$
 2. Apply the treatment ($t=1$)
 3. Observe the outcome ($Y_1$)
-4. Reset the state to $S_0$
+4. Reset the state to $S_0$ (steps 2. and 3. didn't happen)
 5. Do not apply the treatment ($t=0$)
 6. Observe the outcome ($Y_0$)
 7. Compare the outcomes $Y_1$ and $Y_0$ to get the causal effect
@@ -600,6 +603,8 @@ Some well-established causal inference datasets:
   * Instrumental variables
   * Relaxing the common assumptions
   * Trees, neural networks, policy learners
+* Front-door and back-door adjustments
+* Handling colliders, confounders, feature selection
 * ...
 
 ## Summary
